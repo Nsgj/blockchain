@@ -1,6 +1,6 @@
 package blockchain
 
-import "myblockchain/block"
+import "blockchain/block"
 
 type Blockchain struct {
 	blocks []*block.Block

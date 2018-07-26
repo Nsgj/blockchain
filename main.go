@@ -1,7 +1,7 @@
 package main
 
 import (
-	"myblockchain/blockchain"
+	"blockchain/blockchain"
 	"fmt"
 )
 
