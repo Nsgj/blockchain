@@ -1,7 +1,6 @@
 package proofofwork
 
 import (
-	"blockchain/block"
 	"math/big"
 	"bytes"
 	"strconv"
@@ -10,17 +9,22 @@ import (
 	"crypto/sha256"
 )
 
+type Blockin interface {
+	GetData() []byte
+	GetPrevBlockHash() []byte
+}
+
 const targetBits  = 24
 
 type ProofOfWork struct {
-	block *block.Block
+	block Blockin
 	target *big.Int
 }
 
 func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	data := bytes.Join([][]byte{
-		pow.block.PrevBlockHash,
-		pow.block.Data,
+		pow.block.GetPrevBlockHash(),
+		pow.block.GetData(),
 		IntToHex(int64(targetBits)),
 		IntToHex(int64(nonce)),
 	},
@@ -34,19 +38,19 @@ func (pow *ProofOfWork)Run() (int,[]byte) {
 	nonce := 0
 	maxNonce := math.MaxInt64
 
-	fmt.Printf("Mining the block containing \"%s\"\n",pow.block.Data)
+	fmt.Printf("Mining the block containing \"%s\"\n",pow.block.GetData())
 
 	for nonce < maxNonce {
 		data := pow.prepareData(nonce)
 		hash = sha256.Sum256(data)
 		fmt.Printf("\r%x",hash)
+		hashInt.SetBytes(hash[:])
 
 		if hashInt.Cmp(pow.target) == -1{
 			break
 		}else {
 			nonce++
 		}
-
 		}
 		fmt.Print("\n\n")
 	return nonce,hash[:]
@@ -56,7 +60,7 @@ func IntToHex(n int64) []byte {
 	return []byte(strconv.FormatInt(n, 16))
 }
 
-func NewProofOfWork(b *block.Block) *ProofOfWork {
+func NewProofOfWork(b Blockin) *ProofOfWork {
 	target := big.NewInt(1)
 	target.Lsh(target,uint(256-targetBits))
 
