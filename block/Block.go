@@ -26,6 +26,9 @@ func (b *Block) SetHash() {
 func (b *Block)GetData() []byte {
 	return b.Data
 }
+func (b *Block)GetNonce() int {
+	return b.Nonce
+}
 
 func (b *Block)GetPrevBlockHash() []byte {
 	return b.PrevBlockHash

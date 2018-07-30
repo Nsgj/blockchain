@@ -12,6 +12,7 @@ import (
 type Blockin interface {
 	GetData() []byte
 	GetPrevBlockHash() []byte
+	GetNonce() int
 }
 
 const targetBits  = 24
@@ -30,6 +31,17 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	},
 	[]byte{})
 	return data
+}
+
+func (pow *ProofOfWork)Validate() bool {
+	var hashInt big.Int
+
+	data := pow.prepareData(pow.block.GetNonce())
+	hash := sha256.Sum256(data)
+	hashInt.SetBytes(hash[:])
+
+	isValid := hashInt.Cmp(pow.target) == -1
+	return isValid
 }
 
 func (pow *ProofOfWork)Run() (int,[]byte) {
