@@ -1,6 +1,9 @@
 package blockchain
 
-import "blockchain/block"
+import (
+	"blockchain/block"
+	"github.com/boltdb/bolt"
+)
 
 type Blockchain struct {
 	blocks []*block.Block
@@ -21,7 +24,33 @@ func NewGenesisBlock() *block.Block {
 }
 
 func NewBlockchain() *Blockchain {
-	return &Blockchain{
-		[]*block.Block{NewGenesisBlock()},
+
+	var tip []byte
+	db,err := bolt.Open(dbFile,0600,nil)
+
+	if err != nil{
+
 	}
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b :=  tx.Bucket([]byte(blocksBucket))
+
+		if b == nil {
+			genesis := NewGenesisBlock()
+			b,err := tx.CreateBucket([]byte(blocksBucket))
+
+			err = b.Put(genesis.Hash,genesis.Serialize())
+
+			err = b.Put([]byte("1"),genesis.Hash)
+			tip = genesis.Hash
+		}else {
+			tip = b.Get([]byte("1"))
+		}
+		return nil
+	})
+	bc := Blockchain{tip,db}
+	return &bc
+	//return &Blockchain{
+	//	[]*block.Block{NewGenesisBlock()},
+	//}
 }

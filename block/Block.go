@@ -6,6 +6,7 @@ import (
 	"time"
 	"crypto/sha256"
 	"blockchain/proofofwork"
+	"encoding/gob"
 )
 
 type Block struct {
@@ -21,6 +22,28 @@ func (b *Block) SetHash() {
 	hash := sha256.Sum256(headers)
 
 	b.Hash = hash[:]
+}
+
+func (b *Block)Serialize() []byte {
+	var result bytes.Buffer
+	encoder := gob.NewEncoder(&result)
+	err := encoder.Encode(b)
+
+	if err != nil {
+
+	}
+	return result.Bytes()
+}
+
+func DeserializeBlock(d []byte) *Block {
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(d))
+
+	err := decoder.Decode(&block)
+	if err != nil {
+
+	}
+	return &block
 }
 
 func (b *Block)GetData() []byte {
