@@ -3,6 +3,7 @@ package blockchain
 import (
 	"blockchain/block"
 	"github.com/boltdb/bolt"
+	"errors"
 )
 
 type Blockchain struct {
@@ -23,6 +24,9 @@ func NewGenesisBlock() *block.Block {
 	return block.NewBlock("Genesis Block",[]byte{})
 }
 
+const dbFile = "blotdb"
+const blocksBucket = "blocksBucket"
+
 func NewBlockchain() *Blockchain {
 
 	var tip []byte
@@ -38,6 +42,9 @@ func NewBlockchain() *Blockchain {
 		if b == nil {
 			genesis := NewGenesisBlock()
 			b,err := tx.CreateBucket([]byte(blocksBucket))
+			if err != nil {
+				return errors.New("cannot create bucket")
+			}
 
 			err = b.Put(genesis.Hash,genesis.Serialize())
 
